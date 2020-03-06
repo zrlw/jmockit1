@@ -165,7 +165,6 @@ class BaseTypeRedefinition
 
    private void redefinedImplementedInterfacesIfRunningOnJava8(@Nonnull Class<?> aClass) {
       if (JAVA8) {
-         redefineImplementedInterfaces(aClass.getInterfaces());
       }
    }
 

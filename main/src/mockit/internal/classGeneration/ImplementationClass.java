@@ -32,7 +32,7 @@ public abstract class ImplementationClass<T>
 
    @Nonnull
    public final Class<T> generateClass() {
-      ClassReader classReader = ClassFile.createReaderOrGetFromCache(sourceClass);
+      ClassReader classReader = new ClassReader(ClassFile.readBytesFromClassFile(sourceClass.getName().replace('.', '/')));
 
       ClassVisitor modifier = createMethodBodyGenerator(classReader);
       classReader.accept(modifier);
