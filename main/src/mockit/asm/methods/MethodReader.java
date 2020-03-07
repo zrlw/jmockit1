@@ -8,6 +8,7 @@ import mockit.asm.annotations.*;
 import mockit.asm.controlFlow.*;
 import mockit.asm.jvmConstants.*;
 import mockit.asm.util.*;
+import mockit.internal.BaseClassModifier;
 import static mockit.asm.jvmConstants.JVMInstruction.InstructionType.*;
 import static mockit.asm.jvmConstants.Opcodes.*;
 
@@ -32,6 +33,7 @@ public final class MethodReader extends AnnotatedReader
    @Nonnegative private int methodStartCodeIndex;
    @Nonnegative private int bodyStartCodeIndex;
    @Nonnegative private int parameterAnnotationsCodeIndex;
+   @Nonnegative private int methodParametersIndex;
 
    /**
     * The label objects, indexed by bytecode offset, of the method currently being parsed (only bytecode offsets for which a label is needed
@@ -95,6 +97,9 @@ public final class MethodReader extends AnnotatedReader
          case "Exceptions":
             readExceptionsInThrowsClause();
             return true;
+         case "MethodParameters": 
+            methodParametersIndex = codeIndex; 
+            return false;
          case "RuntimeVisibleParameterAnnotations":
             parameterAnnotationsCodeIndex = codeIndex;
             return false;
@@ -119,6 +124,13 @@ public final class MethodReader extends AnnotatedReader
 
       if (mv == null) {
          return;
+      }
+
+      readMethodParameters();
+      if (cv instanceof BaseClassModifier) {
+         if (((BaseClassModifier) cv).isReadMethodParametersOnly()) {
+            return;
+         }
       }
 
       if (mv instanceof MethodWriter) {
@@ -149,6 +161,21 @@ public final class MethodReader extends AnnotatedReader
       MethodWriter mw = (MethodWriter) mv;
       mw.classReaderOffset = methodStartCodeIndex;
       mw.classReaderLength = codeIndex - methodStartCodeIndex;
+   }
+
+   private void readMethodParameters() {
+      if (methodParametersIndex > 0) {
+         int previousCodeIndex = codeIndex;
+         codeIndex = methodParametersIndex;
+
+         for (int methodParametersCount = readUnsignedByte(); methodParametersCount > 0; methodParametersCount--) {
+            String name = readNonnullUTF8();
+            int access_flags = readUnsignedShort();
+            mv.visitMethodParameter(name, access_flags);
+         }
+
+         codeIndex = previousCodeIndex;
+      }
    }
 
    private void readAnnotationsOnAllParameters() {

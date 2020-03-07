@@ -35,6 +35,7 @@ public class BaseClassModifier extends WrappingClassVisitor
    protected int methodAccess;
    protected String methodName;
    protected String methodDesc;
+   protected boolean readMethodParametersOnly;
 
    protected BaseClassModifier(@Nonnull ClassReader classReader) {
       super(new ClassWriter(classReader));
@@ -58,6 +59,10 @@ public class BaseClassModifier extends WrappingClassVisitor
       cw.visit(modifiedVersion, access, name, additionalInfo);
       superClassName = additionalInfo.superName;
       classDesc = name;
+   }
+
+   public final boolean isReadMethodParametersOnly() {
+      return readMethodParametersOnly;
    }
 
    /**

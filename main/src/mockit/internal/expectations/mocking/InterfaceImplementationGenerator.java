@@ -78,13 +78,14 @@ final class InterfaceImplementationGenerator extends BaseClassModifier
       int access, @Nonnull String name, @Nonnull String desc, @Nullable String signature, @Nullable String[] exceptions
    ) {
       if (!isSynthetic(access)) {
-         generateMethodImplementation(access, name, desc, signature, exceptions);
+         readMethodParametersOnly = true;
+         return generateMethodImplementation(access, name, desc, signature, exceptions);
       }
 
       return null;
    }
 
-   private void generateMethodImplementation(
+   private MethodVisitor generateMethodImplementation(
       int access, @Nonnull String name, @Nonnull String desc, @Nullable String signature, @Nullable String[] exceptions
    ) {
       if (!isStatic(access)) {
@@ -93,8 +94,10 @@ final class InterfaceImplementationGenerator extends BaseClassModifier
          if (!implementedMethods.contains(methodNameAndDesc)) {
             generateMethodBody(access, name, desc, signature, exceptions);
             implementedMethods.add(methodNameAndDesc);
+            return mw;
          }
       }
+      return null;
    }
 
    private void generateMethodBody(

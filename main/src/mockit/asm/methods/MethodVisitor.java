@@ -37,6 +37,15 @@ public class MethodVisitor extends BaseWriter
    public AnnotationVisitor visitParameterAnnotation(@Nonnegative int parameter, @Nonnull String desc) { return null; }
 
    /**
+    * Visits a method parameter of the method being visited.
+    *
+    * @param name the name of the method parameter
+    * @param access_flags the access flags of the method parameter
+    */
+   @Nullable
+   public void visitMethodParameter(@Nonnull String name, @Nonnull int access_flags) { }
+
+   /**
     * Visits a zero operand instruction.
     *
     * @param opcode the {@linkplain Opcodes opcode} of the instruction to be visited:

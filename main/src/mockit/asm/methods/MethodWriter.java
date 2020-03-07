@@ -9,6 +9,7 @@ import mockit.asm.constantPool.*;
 import mockit.asm.controlFlow.*;
 import mockit.asm.exceptionHandling.*;
 import mockit.asm.jvmConstants.*;
+import mockit.asm.methodParameters.MethodParameterVisitor;
 import mockit.asm.types.*;
 import mockit.asm.util.*;
 import static mockit.asm.jvmConstants.Opcodes.*;
@@ -60,6 +61,11 @@ public final class MethodWriter extends MethodVisitor
     * The runtime visible parameter annotations of this method, if any.
     */
    @Nullable private AnnotationVisitor[] parameterAnnotations;
+
+   /**
+    * The method Parameters of this method.
+    */
+   @Nullable protected MethodParameterVisitor methodParameters;
 
    /**
     * The bytecode of this method.
@@ -120,6 +126,13 @@ public final class MethodWriter extends MethodVisitor
       parameterAnnotations[parameter] = aw;
 
       return aw;
+   }
+
+   @Nonnull @Override
+   public void visitMethodParameter(@Nonnull String name, @Nonnull int access_flags) {
+      MethodParameterVisitor aw = new MethodParameterVisitor(cp, name, access_flags);
+      aw.setNext(methodParameters);
+      methodParameters = aw;
    }
 
    @Override
@@ -402,7 +415,7 @@ public final class MethodWriter extends MethodVisitor
          return 6 + classReaderLength;
       }
 
-      int size = 8 + getMarkerAttributesSize() + getAnnotationsSize() + getParameterAnnotationsSize();
+      int size = 8 + getMarkerAttributesSize() + getAnnotationsSize() + getParameterAnnotationsSize() + getMethodParametersSize();
       int codeLength = code.getLength();
 
       if (codeLength > 0) {
@@ -448,6 +461,16 @@ public final class MethodWriter extends MethodVisitor
       return size;
    }
 
+   @Nonnegative
+   private int getMethodParametersSize() {
+      if (methodParameters != null) {
+         cp.newUTF8("MethodParameters");
+         return 7 + methodParameters.getSize();
+      }
+
+      return 0;
+   }
+
    /**
     * Puts the bytecode of this method in the given byte vector.
     */
@@ -476,6 +499,7 @@ public final class MethodWriter extends MethodVisitor
       }
 
       putAnnotationAttributes(out);
+      putMethodParameters(out);
    }
 
    private void putMethodAttributeCount(@Nonnull ByteVector out) {
@@ -498,6 +522,10 @@ public final class MethodWriter extends MethodVisitor
       }
 
       if (parameterAnnotations != null) {
+         attributeCount++;
+      }
+
+      if (methodParameters != null) {
          attributeCount++;
       }
 
@@ -542,6 +570,13 @@ public final class MethodWriter extends MethodVisitor
       if (parameterAnnotations != null) {
          out.putShort(cp.newUTF8("RuntimeVisibleParameterAnnotations"));
          AnnotationVisitor.put(out, parameterAnnotations);
+      }
+   }
+
+   private void putMethodParameters(@Nonnull ByteVector out) {
+      if (methodParameters != null) {
+         out.putShort(cp.newUTF8("MethodParameters"));
+         methodParameters.put(out);
       }
    }
 
