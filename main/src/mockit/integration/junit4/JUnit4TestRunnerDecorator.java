@@ -12,6 +12,7 @@ import org.junit.runners.model.*;
 
 import mockit.integration.*;
 import mockit.internal.expectations.*;
+import mockit.internal.expectations.transformation.ArgumentCapturing;
 import mockit.internal.faking.*;
 import mockit.internal.state.*;
 import static mockit.internal.util.StackTrace.*;
@@ -145,6 +146,8 @@ final class JUnit4TestRunnerDecorator extends TestRunnerDecorator
       Method testMethod = it.getMethod();
       Throwable testFailure = null;
       boolean testFailureExpected = false;
+
+      ArgumentCapturing.clear();
 
       try {
          createInstancesForTestedFieldsFromBaseClasses(testInstance);

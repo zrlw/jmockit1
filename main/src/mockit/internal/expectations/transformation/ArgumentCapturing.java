@@ -21,6 +21,8 @@ public final class ArgumentCapturing
 
    ArgumentCapturing(@Nonnull InvocationBlockModifier modifier) { this.modifier = modifier; }
 
+   public static void clear() { varIndexToTypeDesc.clear(); }
+
    boolean registerMatcher(boolean withCaptureMethod, @Nonnull String methodDesc, @Nonnegative int lastLoadedVarIndex) {
       if (withCaptureMethod && "(Ljava/lang/Object;)Ljava/util/List;".equals(methodDesc)) {
          return false;
