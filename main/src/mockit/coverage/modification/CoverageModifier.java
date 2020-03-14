@@ -152,7 +152,7 @@ final class CoverageModifier extends WrappingClassVisitor
    }
 
    private static boolean isSyntheticOrEnumClass(int access) {
-      return (access & SYNTHETIC) != 0 || access == STATIC + ENUM;
+      return (access & SYNTHETIC) != 0 || ((access & STATIC) != 0 && (access & ENUM) != 0);
    }
 
    private boolean isNestedInsideClassBeingModified(@Nonnull String internalName, @Nullable String outerName) {

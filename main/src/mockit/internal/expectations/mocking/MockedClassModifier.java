@@ -16,6 +16,7 @@ import mockit.internal.*;
 import mockit.internal.expectations.*;
 import static mockit.asm.jvmConstants.Access.SYNTHETIC;
 import static mockit.asm.jvmConstants.Access.ENUM;
+import static mockit.asm.jvmConstants.Access.STATIC;
 import static mockit.asm.jvmConstants.Opcodes.*;
 import static mockit.internal.expectations.MockingFilters.*;
 import static mockit.internal.util.ObjectMethods.isMethodFromObject;
@@ -105,8 +106,7 @@ final class MockedClassModifier extends BaseClassModifier
    public void visitInnerClass(@Nonnull String name, @Nullable String outerName, @Nullable String innerName, int access) {
       cw.visitInnerClass(name, outerName, innerName, access);
 
-      // The second condition is for classes compiled with Java 8 or older, which had a bug (as an anonymous class can never be static).
-      if (access == ENUM + FINAL || access == ENUM + STATIC) {
+      if ((access & ENUM) != 0) {
          if (enumSubclasses == null) {
             enumSubclasses = new ArrayList<>();
          }
